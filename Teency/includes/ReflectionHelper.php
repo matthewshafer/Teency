@@ -12,8 +12,8 @@ class ReflectionHelper
 		$this->reflectionClassContainer['classMethods'] = $methodsArray;
 		$this->reflectionClassContainer['classVariables'] = $variablesArray;
 		
-		print_r($this->reflectionClassContainer['classMethods']);
-		print_r($this->reflectionClassContainer['classVariables']);
+		//print_r($this->reflectionClassContainer['classMethods']);
+		//print_r($this->reflectionClassContainer['classVariables']);
 	}
 	
 	public function __call($method, $args)

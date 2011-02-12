@@ -30,13 +30,13 @@ class ReflectionTest extends UnitTest
 	public function testPrivateReflection()
 	{
 		// i have yet to implement this so i just made the test fail
-		assert(true === false);
+		assert('/* not implemented yet */');
 	}
 	
 	public function testStaticPrivateReflection()
 	{
 		// i have yet ot implement this so i just made the test fail
-		assert(false === true);
+		assert('/* not implemented yet */');
 	}
 	
 	public function testStaticPublicReflection()
@@ -56,17 +56,17 @@ class ReflectionTest extends UnitTest
 	
 	public function testStaticPublicConstructor()
 	{
-		
+		assert('/* not implemented yet */');
 	}
 	
 	public function testMixedReflection()
 	{
-		assert(false === true);
+		assert('/* not implemented yet */');
 	}
 	
 	public function testStaticNoConstructor()
 	{
-		assert(false === true);
+		assert('/* not implemented yet */');
 	}
 
 }

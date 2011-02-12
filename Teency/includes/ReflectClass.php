@@ -22,7 +22,7 @@ class ReflectClass
 		$vars = $ref->getProperties();
 		$methods = $ref->getMethods();
 		
-		var_dump($ref->getConstructor());
+		//var_dump($ref->getConstructor());
 		
 		
 		// the only issue I can see from this is if you are trying to pass an array, in that case you can use an array with an array inside of it.
