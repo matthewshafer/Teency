@@ -10,6 +10,9 @@ class AllTests extends TestSuite
 		
 		require_once('ReflectionTest.php');
 		$this->load('ReflectionTest');
+		
+		require_once('FakeObjectTest.php');
+		$this->load('FakeObjectTest');
 	}
 }
 
