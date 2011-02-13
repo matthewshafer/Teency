@@ -13,4 +13,14 @@ assert_options(ASSERT_WARNING, 0);
 
 //print_r(ErrorHandler::$errors)
 
+class Teency
+{
+	public static function teencyVersion()
+	{
+		// version numbers are YYYYMMDD encoded, they only change on releases
+		// for alpha/beta releases the version number is that of the previous release
+		return 20110212;
+	}
+}
+
 ?>

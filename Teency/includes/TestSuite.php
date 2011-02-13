@@ -24,9 +24,16 @@ class TestSuite
 		
 		$ct = count($this->testMethods);
 		
-		for($i = 0; $i < $ct; $i++)
+		if($this->loadedTest->minTeencyVersion() <= Teency::teencyVersion())
 		{
-			$this->runTest($this->testMethods[$i]);
+			for($i = 0; $i < $ct; $i++)
+			{
+				$this->runTest($this->testMethods[$i]);
+			}
+		}
+		else
+		{
+			printf("Test %s was not run because it requires a newer version of Teency.\n", $class);
 		}
 	}
 	

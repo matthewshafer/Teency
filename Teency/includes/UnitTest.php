@@ -36,5 +36,10 @@ class UnitTest
 		$this->exceptionExpected = false;
 		$this->exceptionName = "";
 	}
+	
+	public function minTeencyVersion()
+	{
+		return null;
+	}
 }
 ?>
