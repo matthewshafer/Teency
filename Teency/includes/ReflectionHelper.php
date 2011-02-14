@@ -19,7 +19,7 @@ class ReflectionHelper
 	public function __call($method, $args)
 	{
 		$mRefProperty = &$this->reflectionClassContainer['classMethods'][$method];
-		$ret;
+		$ret = null;
 		
 		if(isset($mRefProperty))
 		{

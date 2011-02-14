@@ -49,7 +49,16 @@ class ErrorHandler
 			$str .= " Expression was $expression.";
 		}
 		
+		$str .= "\n";
+		
 		self::storeError(null, $str);
+	}
+	
+	public static function errorHandlerCallback($errorNumber, $errorString, $errorFile, $errorLine)
+	{
+		$str = $errorString . " in " . $errorFile . " on line " . $errorLine . ".\n";
+		
+		self::storeError($errorNumber, $str);
 	}
 	
 }
