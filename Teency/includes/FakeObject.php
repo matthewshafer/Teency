@@ -4,6 +4,7 @@ class FakeObject
 {
 	private $fakeMethods = array();
 	private $fakeVariables = array();
+	private $fakeMethodArg = array();
 	
 	
 	public function __construct()
@@ -24,6 +25,7 @@ class FakeObject
 			{
 				$found = true;
 				$returnValue = $this->fakeMethods[$i]['returnValue'];
+				$this->fakeMethodArg[] = array('methodName' => $name, 'methodArguments' => $arguments);
 			}
 			
 			++$i;
@@ -42,6 +44,11 @@ class FakeObject
 	{
 		// doesn't check if the method already exists
 		$this->fakeMethods[] = array('name' => $name, 'returnValue' => $returnValue);
+	}
+	
+	public function getFakeMethodArgumentsArray()
+	{
+		return $this->fakeMethodArg;
 	}
 	
 	public function __set($name, $val)
