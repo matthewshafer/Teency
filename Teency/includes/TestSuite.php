@@ -41,6 +41,8 @@ class TestSuite
 	{
 		// need setup and tear down methods
 		// need to add reasons why tests failed
+		$alreadyCounted = false;
+		
 		try
 		{
 			$this->loadedTest->setUpTest();
@@ -53,30 +55,37 @@ class TestSuite
 
 				printf("%s...passed\n", $methodName);
 				TestSuiteData::testPassed();
+				$alreadyCounted = true;
 			}
 			else if($this->loadedTest->expectedException() === true && get_class($e) != $this->loadedTest->expectedExceptionName())
 			{
 				// need to rewrite the error so it sounds better
 				printf("%s...failed: Test did not throw expected exception: %s %s\n", $methodName, $this->loadedTest->expectedExceptionName(), ErrorHandler::getErrors());
 				TestSuiteData::testFailed();
+				$alreadyCounted = true;
 			}
 			// might combine the else if and else statements
 			else
 			{
 				printf("%s...failed: Test threw an exception and we weren't expecting one: %s.\nOther Errors: %s\n", $methodName, $e->getMessage(), ErrorHandler::getErrors());
 				TestSuiteData::testFailed();
+				$alreadyCounted = true;
 			}
 		}
 		
-		if($this->loadedTest->expectedException() === false && !ErrorHandler::haveErrors())
+		// if the test hasn't already been counted, so if there wasn't an exception
+		if(!$alreadyCounted)
 		{
-			printf("%s...passed\n", $methodName);
-			TestSuiteData::testPassed();
-		}
-		else
-		{
-			printf("%s...failed: %s\n", $methodName, ErrorHandler::getErrors());
-			TestSuiteData::testFailed();
+			if($this->loadedTest->expectedException() === false && !ErrorHandler::haveErrors())
+			{
+				printf("%s...passed\n", $methodName);
+				TestSuiteData::testPassed();
+			}
+			else
+			{
+				printf("%s...failed: %s\n", $methodName, ErrorHandler::getErrors());
+				TestSuiteData::testFailed();
+			}
 		}
 		
 		$this->loadedTest->tearDownTest();
