@@ -3,6 +3,7 @@
 require_once("AutoLoader.php");
 
 spl_autoload_register('AutoLoader::load');
+spl_autoload_register('AutoLoader::fauxThreadLoad');
 
 
 set_error_handler('ErrorHandler::errorHandlerCallback', E_ALL);

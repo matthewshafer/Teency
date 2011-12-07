@@ -1,14 +1,34 @@
 <?php
+
 class TestSuite
 {
 	private $loadedTest = null;
 	private $testMethods = array();
+	private $socket = null;
+	private $fauxPool = null;
+	private $totalTests = 0;
 	
 	
-	public function load($class)
+	public function load($class, $runInParallel = false, $numberInParallel = 2)
 	{
 		$this->testMethods = array();
 		$this->loadedTest = new $class();
+		$sockets = array();
+		
+		// building the threadPool and sockets
+		if($runInParallel === true && $this->fauxPool === null)
+		{
+			// needs a try catch around this
+			$this->fauxPool = new fauxThreadPool($numberInParallel);
+			
+			if(!socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $this->socket))
+			{
+				die(socket_strerror(socket_last_error()));
+			}
+			
+			//socket_set_nonblock($this->socket[0]);
+			//socket_set_nonblock($this->socket[1]);
+		}
 		
 		$getMethods = get_class_methods($this->loadedTest);
 		
@@ -28,7 +48,22 @@ class TestSuite
 		{
 			for($i = 0; $i < $ct; $i++)
 			{
-				$this->runTest($this->testMethods[$i]);
+				if($runInParallel === false)
+				{
+					$this->runTest($this->testMethods[$i]);
+				}
+				else
+				{
+					$parallelRunner = new ParallelRunner($this->loadedTest, $this->testMethods[$i], $this->socket);
+					
+					// need to add something to fauxThread so we can get the amount of waiting tasks.
+					
+					// placeholder code for testing
+					$this->fauxPool->addTask($parallelRunner);
+					$this->totalTests++;
+					pcntl_signal_dispatch();
+					//$this->processSocket();
+				}
 			}
 		}
 		else
@@ -93,9 +128,68 @@ class TestSuite
 		ErrorHandler::clearErrors();
 	}
 	
+	private function processSocket()
+	{
+		// needs error checking
+		//var_dump(debug_backtrace());
+		
+		$raw = socket_read($this->socket[0], 65536, PHP_NORMAL_READ);
+		
+		//var_dump($raw);
+		//var_dump(socket_strerror(socket_last_error()));
+		
+		$serialized = unserialize($raw);
+		//var_dump($serialized);
+		
+		if($serialized['pass'] === true)
+		{
+			printf("%s\n", $serialized['passOrFailStr']);
+			TestSuiteData::testPassed();
+		}
+		else
+		{
+			printf("%s\n", $serialized['passOrFailStr']);
+			TestSuiteData::testFailed();
+		}
+	}
+	
+	public function drainSocket()
+	{
+		while(pcntl_signal_dispatch() && $this->fauxPool->hasRunningTasks())
+		{
+			$this->processSocket();
+			sleep(1);
+		}
+	}
+	
+	public function outputResults()
+	{
+	
+		if($this->fauxPool !== null)
+		{
+			
+			// just making sure there is no data left on the socket
+			$this->drainSocket();
+			//socket_close($this->socket);
+			//socket_close($this->socketWrite);
+			
+			var_dump($this->totalTests);
+			
+			while($this->totalTests > TestSuiteData::totalTests())
+			{
+				$this->processSocket();
+				//sleep(1);
+			}
+		}
+		
+		printf("Total Tests: %d\nTests Passed: %d\nTests Failed: %d\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalFailed());
+	}
+	
 	public function __destruct()
 	{
-		printf("Total Tests: %d\nTests Passed: %d\nTests Failed: %d\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalFailed());
+		//var_dump(debug_backtrace());
+		printf("destructor called\n");
+		//printf(var_dump($this->socket));
 	}
 	
 }

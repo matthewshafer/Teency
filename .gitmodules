@@ -1,0 +1,3 @@
+[submodule "Teency/externals/fauxThread"]
+	path = Teency/externals/fauxThread
+	url = https://github.com/matthewshafer/fauxThread.git
