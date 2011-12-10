@@ -174,7 +174,7 @@ class TestSuite
 		}
 	}
 	
-	public function drainSocket()
+	private function processFinishDrain()
 	{
 		while(pcntl_signal_dispatch() && $this->fauxPool->hasRunningTasks())
 		{
@@ -189,9 +189,10 @@ class TestSuite
 		if($this->fauxPool !== null)
 		{
 			
-			// just making sure there is no data left on the socket
-			$this->drainSocket();
+			// waiting for processes to finish their work
+			$this->processFinishDrain();
 			
+			// makes sure we get all of the data from the socket
 			while($this->totalTests > TestSuiteData::totalTests())
 			{
 				$this->processSocket();
