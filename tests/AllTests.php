@@ -14,7 +14,8 @@ class AllTests extends TestSuite
 		require_once('FakeObjectTest.php');
 		$this->load('FakeObjectTest');
 		
-		$this->outputResults();
+		require_once('LongRunningTest.php');
+		$this->load('LongRunningTest');
 	}
 }
 
