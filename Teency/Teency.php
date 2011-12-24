@@ -20,7 +20,7 @@ class Teency
 	{
 		// version numbers are YYYYMMDD encoded, they only change on releases
 		// for alpha/beta releases the version number is that of the previous release
-		return 20110212;
+		return 20111223;
 	}
 }
 
