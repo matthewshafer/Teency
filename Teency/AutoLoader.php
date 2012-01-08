@@ -1,7 +1,22 @@
 <?php
+
+/**
+ * AutoLoader class.
+ * 
+ * functions for autoloading files required for teensy
+ *
+ * @author Matthew Shafer <matt@niftystopwatch.com>
+ */
 class AutoLoader
 {
-
+	
+	/**
+	 * load function.
+	 * 
+	 * auto loads all of the teensy files
+	 *
+	 * @param className
+	 */
 	public static function load($className)
 	{
 		// need to make this way smarter
@@ -13,6 +28,13 @@ class AutoLoader
 		}
 	}
 	
+	/**
+	 * fauxThreadLoad function.
+	 * 
+	 * loads the files required for fauxThread
+	 *
+	 * @param className
+	 */
 	public static function fauxThreadLoad($className)
 	{
 		$file = dirname(__FILE__) . '/externals/fauxThread/src/' . $className . '.php';

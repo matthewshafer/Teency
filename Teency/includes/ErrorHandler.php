@@ -1,8 +1,24 @@
 <?php
+
+/**
+ * ErrorHandler class.
+ * 
+ * Handles various errors that php can throw
+ *
+ * @author Matthew Shafer <matt@niftystopwatch.com>
+ */
 class ErrorHandler
 {
 	public static $errors = array();
 	
+	/**
+	 * storeError function.
+	 * 
+	 * Stores the error number and the string related to the error into the $errors array
+	 *
+	 * @param $errorNumber
+	 * @param $errorString
+	 */
 	public static function storeError($errorNumber, $errorString)
 	{
 		$tmp = array('number' => $errorNumber, 'string' => $errorString);
