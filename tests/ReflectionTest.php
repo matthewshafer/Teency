@@ -9,6 +9,7 @@ require_once('reflectionData/TestMixedReflection.php');
 require_once('reflectionData/TestStaticNoConstructorReflection.php');
 require_once('reflectionData/TestNoConstructorReflection.php');
 require_once('reflectionData/TestConstructorWithArgsReflection.php');
+require_once('reflectionData/TestNotRunningConstructor.php');
 
 class ReflectionTest extends UnitTest
 {
@@ -213,6 +214,19 @@ class ReflectionTest extends UnitTest
 		assert($test->test3 === 12);
 		
 		assert($test->testMe === 999);
+	}
+
+	public function testNotRunningConstructor()
+	{
+		$refClass = new ReflectClass('TestNotRunningConstructor', null);
+		
+		// will not work until php 5.4
+		$test = $refClass->getReflection(false);
+		echo $test->test;
+
+		assert($test->test === 1);
+		assert($test->test2 === "test");
+		
 	}
 
 }

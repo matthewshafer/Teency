@@ -11,7 +11,7 @@ class ReflectClass
 		$this->classArgs = $classArgs;
 	}
 	
-	public function getReflection()
+	public function getReflection($runConstructor = true)
 	{
 		$varArr = array();
 		$methodArr = array();
@@ -24,15 +24,21 @@ class ReflectClass
 		
 		//var_dump($ref->getConstructor());
 		
-		
-		// the only issue I can see from this is if you are trying to pass an array, in that case you can use an array with an array inside of it.
-		if(is_array($this->classArgs))
+		if($runConstructor === true)
 		{
-			$class = $ref->newInstanceArgs($this->classArgs);
+			// the only issue I can see from this is if you are trying to pass an array, in that case you can use an array with an array inside of it.
+			if(is_array($this->classArgs))
+			{
+				$class = $ref->newInstanceArgs($this->classArgs);
+			}
+			else
+			{
+				$class = $ref->newInstance();
+			}
 		}
 		else
 		{
-			$class = $ref->newInstance();
+			$class = $ref->newInstanceWithoutConstructor();
 		}
 		
 		foreach($vars as $var)
