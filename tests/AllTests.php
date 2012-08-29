@@ -1,5 +1,5 @@
 <?php
-require_once('../Teency/Teency.php');
+require_once('Teency/Teency.php');
 
 class AllTests extends TestSuite
 {
