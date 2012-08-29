@@ -1,1 +1,0 @@
-To keep it simple, Teency makes it easy for me to write unit tests, it captures errors (as long as they are not fatal) and exceptions for tests and lets me know if the tests pass or fail.
