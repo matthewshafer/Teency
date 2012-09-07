@@ -1,6 +1,16 @@
 language: php
+
+allow_failures:
+  - php: 5.3
+
 php:
   - 5.3
   - 5.4
 
-script: "php tests/AllTests.php"
+env:
+  - PARALLEL=false
+  - PARALLEL=true
+
+script:
+  - if [[ "$PARALLEL" == "false" ]]; then "php tests/AllTests.php"; fi
+  - if [[ "$PARALLEL" == "true" ]]; then "php tests/AllTestsParallel.php"; fi
