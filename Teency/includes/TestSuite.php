@@ -196,6 +196,7 @@ class TestSuite
 			while($this->totalTests > TestSuiteData::totalTests())
 			{
 				$this->processSocket();
+				printf("waiting");
 				usleep(500);
 			}
 		}
