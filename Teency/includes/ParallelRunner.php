@@ -1,5 +1,4 @@
 <?php
-
 class ParallelRunner implements fauxThreadRunner
 {
 	
@@ -16,8 +15,22 @@ class ParallelRunner implements fauxThreadRunner
 	
 	public function run()
 	{
+		$socket = $this->socket;
+		$method = $this->testMethod;
+		
+		register_shutdown_function(function() use (&$socket, &$testMethod) { 
+				$error = error_get_last();
+				if($error['type'] === 1)
+				{
+					$arr = array();
+					$arr['passOrFailStr'] = sprintf("%s...failed, fatal error", $this->testMethod);
+					$arr['pass'] = false;
+					$serial = serialize($arr) . "\n";
+					socket_write($this->socket[1], $serial, strlen($serial));
+				}
+		});
 		//socket_close($this->socket[0]);
-		$this->runMultiTest($this->testMethod);
+		$this->runMultiTest($method);
 		// closing the socket
 		//socket_close($this->socket[1]);
 		exit(0);
