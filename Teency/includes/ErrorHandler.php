@@ -36,6 +36,11 @@ class ErrorHandler
 		
 		return $ret;
 	}
+
+	public static function errorCount()
+	{
+		return count(self::$errors);
+	}
 	
 	public static function getErrors()
 	{
@@ -75,6 +80,23 @@ class ErrorHandler
 		$str = $errorString . " in " . $errorFile . " on line " . $errorLine . ".\n";
 		
 		self::storeError($errorNumber, $str);
+	}
+
+	public static function equalityBacktrace($info, $backtrace)
+	{
+		$info = $info . ": " . self::equalityBacktraceLineNumber($backtrace). "\n";
+
+		self::storeError(null, $info);
+	}
+
+	private static function backtraceFormatter($backtrace)
+	{
+		return var_export($backtrace, true);
+	}
+
+	private static function equalityBacktraceLineNumber($backtrace)
+	{
+		return isset($backtrace[0]['line']) ? $backtrace[0]['line'] : null;
 	}
 	
 }

@@ -5,6 +5,9 @@ class AllTests extends TestSuite
 {
 	public function tests()
 	{
+		require_once('EqualityTest.php');
+		$this->load('EqualityTest');
+
 		require_once('AssertTest.php');
 		$this->load('AssertTest');
 		

@@ -1,6 +1,6 @@
 <?php
 
-class UnitTest
+class UnitTest extends EqualityTests
 {
 	private $exceptionExpected = false;
 	private $exceptionName = "";
@@ -24,6 +24,20 @@ class UnitTest
 	{
 		$this->exceptionName = $exceptionName;
 		$this->exceptionExpected = true;
+	}
+
+	public function errorCountShouldBe($count)
+	{
+		$errorCount = ErrorHandler::errorCount();
+		if($errorCount !== $count)
+		{
+			throw new Exception("Expected error count $count but got an error count of $errorCount");
+		}
+	}
+
+	public function clearErrors()
+	{
+		ErrorHandler::clearErrors();
 	}
 	
 	public function expectedExceptionName()
