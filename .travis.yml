@@ -12,5 +12,5 @@ env:
   - PARALLEL=true
 
 script:
-  - if [[ "$PARALLEL" == "false" ]]; then "php tests/AllTests.php"; fi
-  - if [[ "$PARALLEL" == "true" ]]; then "php tests/AllTestsParallel.php"; fi
+  - if [[ "$PARALLEL" == "false" ]]; then php tests/AllTests.php; fi
+  - if [[ "$PARALLEL" == "true" ]]; then php tests/AllTestsParallel.php; fi
