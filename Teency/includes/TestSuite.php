@@ -202,6 +202,11 @@ class TestSuite
 		
 		
 		printf("Total Tests: %d\nTests Passed: %d\nTests Failed: %d\nCompleted in %f\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalFailed(), microtime(true) - $this->startTime);
+
+		if(TestSuiteData::totalFailed() > 0)
+		{
+			exit(1);
+		}
 	}
 	
 	public function __destruct()
