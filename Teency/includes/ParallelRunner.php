@@ -20,13 +20,13 @@ class ParallelRunner extends TestRunner implements fauxThreadRunner
 		$socket = $this->socket;
 		$method = $this->testMethod;
 
-		$callback = function() use (&$socket, &$testMethod) { 
+		$callback = function() use (&$socket, &$method) { 
 				$error = error_get_last();
 				if($error['type'] === 1)
 				{
 					$arr = array();
-					$arr['passOrFailStr'] = sprintf("%s...failed, fatal error", $testMethod);
-					$arr['pass'] = false;
+					$arr['passOrFailStr'] = sprintf("%s...failed, fatal error", $method);
+					$arr['result'] = 'f';
 					$serial = serialize($arr) . "\n";
 					socket_write($socket[1], $serial, strlen($serial));
 				}

@@ -169,7 +169,13 @@ class TestSuite extends TestRunner
 		}
 		
 		
-		printf("Total Tests: %d\nTests Passed: %d\nTests Skipped: %d\nTests Failed: %d\nCompleted in %f\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalSkipped(), TestSuiteData::totalFailed(), microtime(true) - $this->startTime);
+		printf("Total Tests: %d\nTests Passed: %d\nTests Skipped: %d\nTests Failed: %d\nCompleted in %f\n", 
+			TestSuiteData::totalTests(), 
+			TestSuiteData::totalPassed(), 
+			TestSuiteData::totalSkipped(), 
+			TestSuiteData::totalFailed(), 
+			microtime(true) - $this->startTime
+		);
 
 		if(TestSuiteData::totalFailed() > 0)
 		{
