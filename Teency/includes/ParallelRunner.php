@@ -1,5 +1,5 @@
 <?php
-class ParallelRunner implements fauxThreadRunner
+class ParallelRunner extends TestRunner implements fauxThreadRunner
 {
 	
 	private $loadedTest;
@@ -31,70 +31,14 @@ class ParallelRunner implements fauxThreadRunner
 		};
 
 		register_shutdown_function($callback);
-		//socket_close($this->socket[0]);
-		$this->runMultiTest($method);
-		// closing the socket
-		//socket_close($this->socket[1]);
+		// runs the test and writes it to the socket
+		$this->writeToSocket($this->runTest($this->loadedTest, $method));
 		exit(0);
 	}
-	
-	private function runMultiTest($methodName)
-	{
-		$testResultArray = array();
-		$alreadyCounted = false;
-		
-		try
-		{
-			$this->loadedTest->setUpTest();
-			$this->loadedTest->$methodName();
-		}
-		catch(Exception $e)
-		{
-			if($this->loadedTest->expectedException() === true && get_class($e) === $this->loadedTest->expectedExceptionName())
-			{
 
-				$testResultArray['passOrFailStr'] = sprintf("%s...passed", $methodName);
-				$testResultArray['pass'] = true; 
-				$alreadyCounted = true;
-			}
-			else if($this->loadedTest->expectedException() === true && get_class($e) != $this->loadedTest->expectedExceptionName())
-			{
-				// need to rewrite the error so it sounds better
-				$testResultArray['passOrFailStr'] = sprintf("%s...failed: Test did not throw expected exception: %s %s", $methodName, $this->loadedTest->expectedExceptionName(), ErrorHandler::getErrors());
-				$testResultArray['pass'] = false;
-				$alreadyCounted = true;
-			}
-			// might combine the else if and else statements
-			else
-			{
-				$testResultArray['passOrFailStr'] = sprintf("%s...failed: Test threw an exception and we weren't expecting one: %s.  Other Errors: %s", $methodName, $e->getMessage(), ErrorHandler::getErrors());
-				$testResultArray['pass'] = false;
-				$alreadyCounted = true;
-			}
-		}
-		
-		// if the test hasn't already been counted, so if there wasn't an exception
-		if(!$alreadyCounted)
-		{
-			if($this->loadedTest->expectedException() === false && !ErrorHandler::haveErrors())
-			{
-				$testResultArray['passOrFailStr'] = sprintf("%s...passed", $methodName);
-				$testResultArray['pass'] = true; 
-			}
-			else
-			{
-				$testResultArray['passOrFailStr'] = sprintf("%s...failed: %s", $methodName, ErrorHandler::getErrors());
-				$testResultArray['pass'] = false;
-			}
-		}
-		
-		$this->loadedTest->tearDownTest();
-		$this->loadedTest->internalCleanupAfterEachTest();
-		ErrorHandler::clearErrors();
-		
-		$serial = serialize($testResultArray) . "\n";
-		//var_dump($serial);
-		
+	private function writeToSocket($data)
+	{
+		$serial = serialize($data) . "\n";
 		socket_write($this->socket[1], $serial, strlen($serial));
 	}
 }

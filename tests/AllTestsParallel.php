@@ -21,6 +21,9 @@ class AllTests extends TestSuite
 		
 		require_once('FakeObjectTest.php');
 		$this->load('FakeObjectTest');
+
+		require_once('MinVersion.php');
+		$this->load('MinVersion');
 		
 	}
 }

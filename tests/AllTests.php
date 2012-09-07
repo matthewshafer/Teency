@@ -19,6 +19,9 @@ class AllTests extends TestSuite
 		
 		require_once('LongRunningTest.php');
 		$this->load('LongRunningTest');
+
+		require_once('MinVersion.php');
+		$this->load('MinVersion');
 	}
 }
 

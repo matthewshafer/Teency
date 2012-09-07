@@ -1,6 +1,6 @@
 <?php
 
-class TestSuite
+class TestSuite extends TestRunner
 {
 	private $loadedTest = null;
 	private $testMethods = array();
@@ -24,11 +24,58 @@ class TestSuite
 		$this->loadedTest = new $class();
 		$sockets = array();
 		
-		if($this->startTime === null)
+		$this->startTime ?: $this->startTime = microtime(true);
+
+		// private function call that sets up the thread pool if one does not exist yet
+		$this->createThreadPool();
+		
+		// gets a list of all the class methods and counts how many of them there are
+		$getMethods = get_class_methods($this->loadedTest);
+		$ct = count($getMethods);
+		$testMethodsCount = 0;
+		
+		for($i = 0; $i < $ct; $i++)
 		{
-			$this->startTime = microtime(true);
+			if(substr_compare($getMethods[$i], 'test', 0, 3) === 0)
+			{
+				$this->testMethods[] = $getMethods[$i];
+				$testMethodsCount++;
+			}
 		}
 		
+		if($this->loadedTest->minTeencyVersion() > Teency::teencyVersion())
+		{
+			printf("Test %s was not run because it requires a newer version of Teency.\n", $class);
+			return;
+		}
+
+		for($i = 0; $i < $testMethodsCount; $i++)
+		{
+			if(!$this->parallelTests)
+			{
+				$output = $this->runTest($this->loadedTest, $this->testMethods[$i]);
+				printf("%s\n", $output['passOrFailStr']);
+				$output['pass'] ? TestSuiteData::testPassed() : TestSuiteData::testFailed();
+				$this->totalTests++;
+			}
+			else
+			{
+				$parallelRunner = new ParallelRunner($this->loadedTest, $this->testMethods[$i], $this->socket);
+				
+				// need to add something to fauxThread so we can get the amount of waiting tasks.
+				
+				// placeholder code for testing
+				$this->fauxPool->addTask($parallelRunner);
+				$this->totalTests++;
+				// ends up calling a callback in fauxthread which happens when a child finishes
+				pcntl_signal_dispatch();
+				$this->processSocket();
+			}
+		}
+	}
+
+	private function createThreadPool()
+	{
 		// building the threadPool and sockets
 		if($this->parallelTests === true && $this->fauxPool === null)
 		{
@@ -37,111 +84,13 @@ class TestSuite
 			
 			if(!socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $this->socket))
 			{
+				// maybe we should have this revert to running the test normally
 				die(socket_strerror(socket_last_error()));
 			}
 			
 			// setting the reader to non-blocking so we don't stall out when reading data
 			socket_set_nonblock($this->socket[0]);
-			//socket_set_nonblock($this->socket[1]);
 		}
-		
-		$getMethods = get_class_methods($this->loadedTest);
-		
-		$ct = count($getMethods);
-		
-		for($i = 0; $i < $ct; $i++)
-		{
-			if(substr_compare($getMethods[$i], 'test', 0, 3) === 0)
-			{
-				$this->testMethods[] = $getMethods[$i];
-			}
-		}
-		
-		$ct = count($this->testMethods);
-		
-		if($this->loadedTest->minTeencyVersion() <= Teency::teencyVersion())
-		{
-			for($i = 0; $i < $ct; $i++)
-			{
-				if($this->parallelTests === false)
-				{
-					$this->runTest($this->testMethods[$i]);
-					$this->totalTests++;
-				}
-				else
-				{
-					$parallelRunner = new ParallelRunner($this->loadedTest, $this->testMethods[$i], $this->socket);
-					
-					// need to add something to fauxThread so we can get the amount of waiting tasks.
-					
-					// placeholder code for testing
-					$this->fauxPool->addTask($parallelRunner);
-					$this->totalTests++;
-					pcntl_signal_dispatch();
-					$this->processSocket();
-				}
-			}
-		}
-		else
-		{
-			printf("Test %s was not run because it requires a newer version of Teency.\n", $class);
-		}
-	}
-	
-	private function runTest($methodName)
-	{
-		// need setup and tear down methods
-		// need to add reasons why tests failed
-		$alreadyCounted = false;
-		
-		try
-		{
-			$this->loadedTest->setUpTest();
-			$this->loadedTest->$methodName();
-		}
-		catch(Exception $e)
-		{
-			if($this->loadedTest->expectedException() === true && get_class($e) === $this->loadedTest->expectedExceptionName())
-			{
-
-				printf("%s...passed\n", $methodName);
-				TestSuiteData::testPassed();
-				$alreadyCounted = true;
-			}
-			else if($this->loadedTest->expectedException() === true && get_class($e) != $this->loadedTest->expectedExceptionName())
-			{
-				// need to rewrite the error so it sounds better
-				printf("%s...failed: Test did not throw expected exception: %s %s\n", $methodName, $this->loadedTest->expectedExceptionName(), ErrorHandler::getErrors());
-				TestSuiteData::testFailed();
-				$alreadyCounted = true;
-			}
-			// might combine the else if and else statements
-			else
-			{
-				printf("%s...failed: Test threw an exception and we weren't expecting one: %s.\nOther Errors: %s\n", $methodName, $e->getMessage(), ErrorHandler::getErrors());
-				TestSuiteData::testFailed();
-				$alreadyCounted = true;
-			}
-		}
-		
-		// if the test hasn't already been counted, so if there wasn't an exception
-		if(!$alreadyCounted)
-		{
-			if($this->loadedTest->expectedException() === false && !ErrorHandler::haveErrors())
-			{
-				printf("%s...passed\n", $methodName);
-				TestSuiteData::testPassed();
-			}
-			else
-			{
-				printf("%s...failed: %s\n", $methodName, ErrorHandler::getErrors());
-				TestSuiteData::testFailed();
-			}
-		}
-		
-		$this->loadedTest->tearDownTest();
-		$this->loadedTest->internalCleanupAfterEachTest();
-		ErrorHandler::clearErrors();
 	}
 	
 	private function processSocket()
@@ -155,17 +104,12 @@ class TestSuite
 			{
 				$serialized = unserialize($tmpStr);
 				
-				if($serialized['pass'] === true)
-				{
-					printf("%s\n", $serialized['passOrFailStr']);
-					TestSuiteData::testPassed();
-				}
-				else
-				{
-					printf("%s\n", $serialized['passOrFailStr']);
-					TestSuiteData::testFailed();
-				}
-					$tmpStr = "";
+				printf("%s\n", $serialized['passOrFailStr']);
+
+				$serialized['pass'] ? TestSuiteData::testPassed() : TestSuiteData::testFailed();
+				
+				// setting the temp string to an empty one so we can continue processing	
+				$tmpStr = "";
 			}
 			else
 			{
@@ -186,17 +130,35 @@ class TestSuite
 	private function outputResults()
 	{
 	
-		if($this->fauxPool !== null)
+		if($this->fauxPool)
 		{
 			
 			// waiting for processes to finish their work
 			$this->processFinishDrain();
-			
-			// makes sure we get all of the data from the socket
-			while($this->totalTests > TestSuiteData::totalTests())
+
+			// doing 5 loops to check the socket for data, if there we don't get any and we have
+			// less completed tests than we had sent to run we fail them
+			$count = 5;
+
+			for($i = 0; $i < $count; $i++)
 			{
+				if($this->totalTests === TestSuiteData::totalTests())
+				{
+					break;
+				}
+
 				$this->processSocket();
 				usleep(500);
+			}
+
+			// checking to see if we have less reported tests than tests we sent off to run
+			// if we do then we fail a bunch of tests and make the test suite fail
+			if(($toFail = $this->totalTests - TestSuiteData::totalTests()) > 0)
+			{
+				for($i = 0; $i < $toFail; $i++)
+				{
+					TestSuiteData::testFailed();
+				}
 			}
 		}
 		
