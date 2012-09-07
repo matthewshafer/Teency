@@ -1,13 +1,17 @@
 <?php
-require_once('../Teency/Teency.php');
+require_once('Teency/Teency.php');
 
 class AllTests extends TestSuite
 {
 	public function tests()
 	{
 		$this->runParallelTests(true, 20);
+
 		require_once('LongRunningTest.php');
 		$this->load('LongRunningTest');
+
+		require_once('EqualityTest.php');
+		$this->load('EqualityTest');
 		
 		require_once('AssertTest.php');
 		$this->load('AssertTest');
