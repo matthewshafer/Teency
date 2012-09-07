@@ -38,6 +38,8 @@ class ReflectClass
 		}
 		else
 		{
+			// requires a specific version of php
+			Teency::phpVersionAtLeast('5.4.0');
 			$class = $ref->newInstanceWithoutConstructor();
 		}
 		

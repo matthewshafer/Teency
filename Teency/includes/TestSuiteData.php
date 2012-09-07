@@ -4,6 +4,7 @@ class TestSuiteData
 {
 	private static $passed = 0;
 	private static $failed = 0;
+	private static $skipped = 0;
 	
 	public static function testPassed()
 	{
@@ -14,10 +15,15 @@ class TestSuiteData
 	{
 		self::$failed++;
 	}
+
+	public static function testSkipped()
+	{
+		self::$skipped++;
+	}
 	
 	public static function totalTests()
 	{
-		return self::$passed + self::$failed;
+		return self::$passed + self::$failed + self::$skipped;
 	}
 	
 	public static function totalPassed()
@@ -28,6 +34,11 @@ class TestSuiteData
 	public static function totalFailed()
 	{
 		return self::$failed;
+	}
+
+	public static function totalSkipped()
+	{
+		return self::$skipped;
 	}
 
 

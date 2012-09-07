@@ -5,12 +5,14 @@ class ParallelRunner extends TestRunner implements fauxThreadRunner
 	private $loadedTest;
 	private $testMethod;
 	private $socket;
+	private $allowSkippedTests;
 	
-	public function __construct($loadedTest, $testMethod, $socketWrite)
+	public function __construct($loadedTest, $testMethod, $socketWrite, $allowSkippedTests)
 	{
 		$this->loadedTest = $loadedTest;
 		$this->testMethod = $testMethod;
 		$this->socket = $socketWrite;
+		$this->allowSkippedTests = $allowSkippedTests;
 	}
 	
 	public function run()
@@ -32,7 +34,7 @@ class ParallelRunner extends TestRunner implements fauxThreadRunner
 
 		register_shutdown_function($callback);
 		// runs the test and writes it to the socket
-		$this->writeToSocket($this->runTest($this->loadedTest, $method));
+		$this->writeToSocket($this->runTest($this->loadedTest, $method, $this->allowSkippedTests));
 		exit(0);
 	}
 

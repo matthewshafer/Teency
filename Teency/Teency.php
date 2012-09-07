@@ -22,6 +22,14 @@ class Teency
 		// for alpha/beta releases the version number is that of the previous release
 		return 20111223;
 	}
+
+	public static function phpVersionAtLeast($compare)
+	{
+		if(version_compare(PHP_VERSION, $compare, '<'))
+		{
+			throw new SkipTestException();
+		}
+	}
 }
 
 ?>

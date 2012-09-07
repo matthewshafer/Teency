@@ -10,12 +10,18 @@ class TestSuite extends TestRunner
 	private $parallelTests = false;
 	private $numberOfParallelTests = 2;
 	private $startTime = null;
+	private $allowSkippedTests = true;
 	
 	
 	public function runParallelTests($enable = true, $numberInParallel = 2)
 	{
 		$this->parallelTests = $enable;
 		$this->numberOfParallelTests =  $numberInParallel;
+	}
+
+	public function allowSkippedTests($skip = true)
+	{
+		$this->allowSkippedTests = $skip;
 	}
 	
 	public function load($class)
@@ -53,14 +59,14 @@ class TestSuite extends TestRunner
 		{
 			if(!$this->parallelTests)
 			{
-				$output = $this->runTest($this->loadedTest, $this->testMethods[$i]);
+				$output = $this->runTest($this->loadedTest, $this->testMethods[$i], $this->allowSkippedTests);
 				printf("%s\n", $output['passOrFailStr']);
-				$output['pass'] ? TestSuiteData::testPassed() : TestSuiteData::testFailed();
+				$this->processTestResult($output['result']);
 				$this->totalTests++;
 			}
 			else
 			{
-				$parallelRunner = new ParallelRunner($this->loadedTest, $this->testMethods[$i], $this->socket);
+				$parallelRunner = new ParallelRunner($this->loadedTest, $this->testMethods[$i], $this->socket, $this->allowSkippedTests);
 				
 				// need to add something to fauxThread so we can get the amount of waiting tasks.
 				
@@ -106,7 +112,7 @@ class TestSuite extends TestRunner
 				
 				printf("%s\n", $serialized['passOrFailStr']);
 
-				$serialized['pass'] ? TestSuiteData::testPassed() : TestSuiteData::testFailed();
+				$this->processTestResult($serialized['result']);
 				
 				// setting the temp string to an empty one so we can continue processing	
 				$tmpStr = "";
@@ -163,11 +169,27 @@ class TestSuite extends TestRunner
 		}
 		
 		
-		printf("Total Tests: %d\nTests Passed: %d\nTests Failed: %d\nCompleted in %f\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalFailed(), microtime(true) - $this->startTime);
+		printf("Total Tests: %d\nTests Passed: %d\nTests Skipped: %d\nTests Failed: %d\nCompleted in %f\n", TestSuiteData::totalTests(), TestSuiteData::totalPassed(), TestSuiteData::totalSkipped(), TestSuiteData::totalFailed(), microtime(true) - $this->startTime);
 
 		if(TestSuiteData::totalFailed() > 0)
 		{
 			exit(1);
+		}
+	}
+
+	private function processTestResult($result)
+	{
+		switch($result)
+		{
+			case 'p':
+				TestSuiteData::testPassed();
+				break;
+			case 'f':
+				TestSuiteData::testFailed();
+				break;
+			case 's':
+				TestSuiteData::testSkipped();
+				break;
 		}
 	}
 	
